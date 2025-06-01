@@ -1,7 +1,5 @@
-from tkinter import *
+from tkinter import Canvas, Text, colorchooser
 import tkinter as tk
-import tkinter.ttk as ttk
-from tkcolorpicker import askcolor
 
 from pynput import mouse
 from pynput.mouse import Controller
@@ -32,8 +30,6 @@ def GetColour(x, y):
     rgbim = im.convert('RGB')
     r,g,b = rgbim.getpixel((0,0))
     colour = '#%02x%02x%02x' % (r, g, b)
-    
-    print(f'COLOR: rgb{(r,g,b)} | HEX #{GetHex((r,g,b))}')
 
 def OnMove(x, y):
     GetColour(x,y)
@@ -66,7 +62,6 @@ def Update():
         if abs(x - lastMousePosition[0]) > positionDelta or \
            abs(y - lastMousePosition[1]) > positionDelta:
             lastMousePosition = (x, y)
-            print("Mouse Pos: ",lastMousePosition)
 
             GetColour(x, y)
             break
@@ -79,15 +74,14 @@ def Update():
 
 def Front():
     win = gw.getWindowsWithTitle('Colour Picker')[0]
-    #print("Window: ",win)
     gw.Win32Window.activate(win)
 
 def Edit():
     global colour
     global r,g,b
     
-    tuple = askcolor((r,g,b), root, "Edit Colour", False)
-    
+    tuple = colorchooser.askcolor((r,g,b), title ="Choose color") 
+
     if tuple[1] != None:
         (r,g,b) = tuple[0]
         colour = tuple[1]
@@ -102,12 +96,8 @@ root.title('Colour Picker')
 root.geometry('250x145')
 root.resizable(False, False)
 
-style = ttk.Style(root)
-style.theme_use('clam')
-
 def SetColour():
     global colour
-    print("Set to: ",colour)
     c.config(bg=colour)
     
     rgb_t.config(state=tk.NORMAL)
@@ -145,5 +135,4 @@ hex_t.insert(1.0, " ")
 hex_t.config(state=tk.DISABLED)
 hex_t.grid(row=5, column=0, columnspan=2)
 
-if __name__ == "__main__":
-    Main()
+Main()
