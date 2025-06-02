@@ -1,13 +1,13 @@
 from tkinter import Canvas, Text, colorchooser
 import tkinter as tk
-from pynput import mouse, keyboard
+from pynput import mouse
 from pynput.mouse import Controller
 from PIL import ImageGrab
 import pygetwindow as gw
 import time
 
 mouseOperator = Controller()
-positionDelta = 5
+positionDelta = 2
 lastMousePosition = (0, 0)
 mouseUpdateTime = 0.1
 clicked = False
@@ -31,16 +31,11 @@ def OnClick(x,y, button, pressed):
         GetColour(x, y)
         clicked = True
         return False
-    
-def OnPress():
-    if 
 
 def Listen():
-    with keyboard.Listener(on_press=OnPress) as keyListener:
-        with mouse.Listener(on_click=OnClick) as mouseListener:
-            keyListener.join()
-            mouseListener.join()
-    Update()
+    with mouse.Listener(on_click=OnClick) as mouseListener:
+        Update()
+        mouseListener.join()
 
 def Update():
     global lastMousePosition
@@ -54,15 +49,16 @@ def Update():
            abs(y - lastMousePosition[1]) > positionDelta:
             lastMousePosition = (x, y)
             GetColour(x, y)
-            break
+            SetColour()
+            root.update()
         time.sleep(mouseUpdateTime)
     SetColour()
     Front()
-    root.mainloop()
 
 def Front():
-    win = gw.getWindowsWithTitle('Colour Picker')[0]
-    gw.Win32Window.activate(win)
+    gw.Win32Window.activate(gw.getWindowsWithTitle('Colour Picker')[0])
+    time.sleep(0.1)
+    root.update()
 
 def Edit():
     global colour
@@ -84,6 +80,7 @@ root.resizable(False, False)
 
 def SetColour():
     global colour
+    print("set ",colour)
     c.config(bg=colour)
     rgb_t.config(state=tk.NORMAL)
     rgb_t.delete('1.0', tk.END)
@@ -119,4 +116,5 @@ hex_t.insert(1.0, " ")
 hex_t.config(state=tk.DISABLED)
 hex_t.grid(row=5, column=0, columnspan=2)
 
-Main()
+if __name__ == "__main__":
+    Main()
