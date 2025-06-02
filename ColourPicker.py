@@ -1,13 +1,9 @@
 from tkinter import Canvas, Text, colorchooser
 import tkinter as tk
-
-from pynput import mouse
+from pynput import mouse, keyboard
 from pynput.mouse import Controller
-
 from PIL import ImageGrab
-
 import pygetwindow as gw
-
 import time
 
 mouseOperator = Controller()
@@ -15,7 +11,6 @@ positionDelta = 5
 lastMousePosition = (0, 0)
 mouseUpdateTime = 0.1
 clicked = False
-
 colour = '#%02x%02x%02x' % (200, 50, 50)
 r,g,b = 200,50,50
 
@@ -25,49 +20,42 @@ def GetHex(rgb):
 def GetColour(x, y):
     global colour
     global r,g,b
-
     im = ImageGrab.grab(bbox=(x, y, x+1, y+1))
     rgbim = im.convert('RGB')
     r,g,b = rgbim.getpixel((0,0))
     colour = '#%02x%02x%02x' % (r, g, b)
 
-def OnMove(x, y):
-    GetColour(x,y)
-
 def OnClick(x,y, button, pressed):
     global clicked
-    global win
-
     if pressed and button == mouse.Button.left:
         GetColour(x, y)
         clicked = True
         return False
+    
+def OnPress():
+    if 
 
 def Listen():
-    with mouse.Listener(on_click=OnClick) as listener:
-        listener.join()
-    
+    with keyboard.Listener(on_press=OnPress) as keyListener:
+        with mouse.Listener(on_click=OnClick) as mouseListener:
+            keyListener.join()
+            mouseListener.join()
     Update()
 
 def Update():
     global lastMousePosition
     global clicked
-
     while True:
         if clicked == True:
             clicked = False
             break
-
         x, y = mouseOperator.position
         if abs(x - lastMousePosition[0]) > positionDelta or \
            abs(y - lastMousePosition[1]) > positionDelta:
             lastMousePosition = (x, y)
-
             GetColour(x, y)
             break
-
         time.sleep(mouseUpdateTime)
-    
     SetColour()
     Front()
     root.mainloop()
@@ -79,9 +67,7 @@ def Front():
 def Edit():
     global colour
     global r,g,b
-    
-    tuple = colorchooser.askcolor((r,g,b), title ="Choose color") 
-
+    tuple = colorchooser.askcolor((r,g,b), title ="Choose color")
     if tuple[1] != None:
         (r,g,b) = tuple[0]
         colour = tuple[1]
@@ -99,12 +85,10 @@ root.resizable(False, False)
 def SetColour():
     global colour
     c.config(bg=colour)
-    
     rgb_t.config(state=tk.NORMAL)
     rgb_t.delete('1.0', tk.END)
     rgb_t.insert(tk.END, f"{r,g,b}")
     rgb_t.config(state=tk.DISABLED)
-
     hex_t.config(state=tk.NORMAL)
     hex_t.delete('1.0', tk.END)
     hex_t.insert(tk.END, f"#{GetHex((r,g,b))}")
